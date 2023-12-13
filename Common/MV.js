@@ -271,7 +271,7 @@ function mult(u, v) {
         }
 
         for (var i = 0; i < u.length; ++i) {
-            if (u[i].length != v[i].length) {
+            if (u.length != v[i].length) {
                 throw "mult(): trying to add matrices of different dimensions";
             }
         }
@@ -289,6 +289,18 @@ function mult(u, v) {
         }
 
         result.matrix = true;
+
+        return result;
+    }
+    else if (u.matrix) {
+
+        for (var i = 0; i < u.length; ++i) {
+            var sum = 0.0;
+            for (var k = 0; k < u.length; ++k) {
+                sum += u[i][k] * v[k];
+            }
+            result.push(sum);
+        }
 
         return result;
     }
