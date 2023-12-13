@@ -62,7 +62,7 @@ var theta = [0, 0, 0];
 var enableRotation = false;
 
 // Variablen, um die Anzahl der Frames pro Sekunde zu ermitteln
-var then = Date.now() / 1000;
+var then = Date.now();
 var counter = 0;
 
 // OpenGL-Speicherobjekt f�r Farben
@@ -388,6 +388,18 @@ var render = function () {
 
     // jetzt kann die Szene gezeichnet werden
     displayScene();
+
+    // Berechnung der FPS alle 20 Frames
+    counter++;
+    var freq = 20;
+    if (counter >= freq) {
+        var fps = 1000 / ((Date.now() - then) / freq)
+        document.getElementById("fps").innerHTML = "FPS: " + fps.toPrecision(2);
+
+        // Zurücksetzen der Zähler
+        counter = 0;
+        then = Date.now();
+    }
 
     // der Frame fertig gezeichnet ist, wird veranlasst, dass der nächste Frame gezeichnet wird. Dazu wird wieder
     // die die Funktion aufgerufen, welche durch die Variable render spezifiziert wird
