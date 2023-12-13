@@ -59,6 +59,7 @@ var colorsArray = [];
 // Variablen für die Drehung des Würfels
 var axis = 0;
 var theta = [0, 0, 0];
+var enableRotation = false;
 
 // Variablen, um die Anzahl der Frames pro Sekunde zu ermitteln
 var then = Date.now() / 1000;
@@ -383,7 +384,7 @@ var render = function () {
 
 
     // Durchführung der Animation: der Würfel wird um 2° weiter gedreht und zwar um die aktuell ausgewählte Achse
-    theta[axis] += 2.0;
+    if (enableRotation) theta[axis] += 2.0;
 
     // jetzt kann die Szene gezeichnet werden
     displayScene();
@@ -443,6 +444,7 @@ window.onload = function init() {
     document.getElementById("ButtonX").onclick = function () { axis = 0; };
     document.getElementById("ButtonY").onclick = function () { axis = 1; };
     document.getElementById("ButtonZ").onclick = function () { axis = 2; };
+    document.getElementById("ButtonT").onclick = function () { enableRotation = !enableRotation };
 
     // jetzt kann mit dem Rendern der Szene begonnen werden  
     render();
