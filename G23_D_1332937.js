@@ -45,7 +45,7 @@
     var vertices = [];
 
     // Array, in dem die Farben der Eckpunkte der zu zeichnenden Objekte eingetragen werden
-    var vertices = [];
+    var colors = [];
 
     // Array, in dem die Eckpunktkoordinaten der zu zeichnenden Objekte eingetragen werden
     var pointsArray = [];
@@ -67,7 +67,7 @@
     var counter = 0;
 
     // OpenGL-Speicherobjekt f�r Farben
-    var nBuffer;
+    var cBuffer;
 
     // OpenGL-Speicherobjekt f�r Vertices
     var vBuffer;
@@ -134,24 +134,25 @@
     // Funktion, die einen Würfel zeichnet (Mittelpunkt liegt im Ursprung, Kantenlänge beträgt 1)
     //
 
-    function drawCube() {
+    function drawCube(pos = [5, 0, 1], rotAxis = [0, 0, 1], scl = [1, 1, 1], matCl = vec4(1.0, 1.0, 0.0, 1.0)) {
 
         // zunächst werden die Koordinaten der 8 Eckpunkte des Würfels definiert
         vertices = [
-        vec4(-0.5, -0.5, 0.5, 1.0), // 0
-        vec4(-0.5, 0.5, 0.5, 1.0), // 1
-        vec4(0.5, 0.5, 0.5, 1.0),  // 2 
-        vec4(0.5, -0.5, 0.5, 1.0),  // 3
-        vec4(-0.5, -0.5, -0.5, 1.0), // 4
-        vec4(-0.5, 0.5, -0.5, 1.0), // 5
-        vec4(0.5, 0.5, -0.5, 1.0),  // 6
-        vec4(0.5, -0.5, -0.5, 1.0)   // 7
+            vec4(-0.5, -0.5, 0.5, 1.0), // 0
+            vec4(-0.5, 0.5, 0.5, 1.0), // 1
+            vec4(0.5, 0.5, 0.5, 1.0),  // 2 
+            vec4(0.5, -0.5, 0.5, 1.0),  // 3
+            vec4(-0.5, -0.5, -0.5, 1.0), // 4
+            vec4(-0.5, 0.5, -0.5, 1.0), // 5
+            vec4(0.5, 0.5, -0.5, 1.0),  // 6
+            vec4(0.5, -0.5, -0.5, 1.0)   // 7
         ];
 
         // Rotation des Würfels um seine z-Achse
         for (var i = 0; i < vertices.length; i++) {
-            vertices[i] = mult(rotate(thetaGlobal, [0, 0, 1]), vertices[i]);
-            vertices[i] = mult(translate(5, 0, 1), vertices[i]);
+            vertices[i] = mult(scalem(scl[0], scl[1], scl[2]), vertices[i]);
+            vertices[i] = mult(rotate(thetaGlobal, rotAxis), vertices[i]);
+            vertices[i] = mult(translate(pos[0], pos[1], pos[2]), vertices[i]);
         }
         
         // hier werden verschiedene Farben definiert (je eine pro Eckpunkt)
@@ -162,7 +163,7 @@
             vec4(0.0, 1.0, 1.0, 1.0),
             vec4(0.0, 0.0, 1.0, 1.0),
             vec4(1.0, 0.0, 1.0, 1.0),
-            vec4(1.0, 0.0, 0.0, 1.0),
+            vec4(1.0, 0.0, 1.0, 1.0),
             vec4(1.0, 1.0, 0.0, 1.0)
         ];
 
@@ -315,7 +316,7 @@
 
         // jetzt werden die Arrays mit der entsprechenden Zeichenfunktion mit Daten gefüllt
         drawCube();
-
+        
         // es wird festgelegt, ob eine Beleuchtungsrechnung für das Objekt durchgeführt wird oder nicht
         var lighting = true; // Beleuchtungsrechnung wird durchgeführt
 
@@ -326,11 +327,11 @@
             // es soll also eine Beleuchtungsrechnung durchgeführt werden
 
             // die Materialfarbe für diffuse Reflektion wird spezifiziert
-            var materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);
+            var materialDiffuse = vec4(1.0, 1.0, 0.0, 1.0);
 
             // die Beleuchtung wird durchgeführt und das Ergebnis an den Shader übergeben
             calculateLights(materialDiffuse);
-
+            
         } else {
 
             // es gibt keine Beleuchtungsrechnung, die vordefinierten Farben wurden bereits
@@ -339,7 +340,7 @@
 
         };
 
-
+        drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2]);
         // es muss noch festgelegt werden, wo das Objekt sich in Weltkoordinaten befindet,
         // d.h. die Model-Matrix muss errechnet werden. Dazu werden wieder Hilfsfunktionen
         // für die Matrizenrechnung aus dem externen Javascript MV.js verwendet
