@@ -13,13 +13,14 @@ Prof. Dr. Ralf D�rner
 
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <title>Computergraphik ist toll!!!</title>
- 
 
-<!-- Hier steht der Quellcode des Vertex-Shaders -->
-<script id="vertex-shader" type="x-shader/x-vertex">
+<head>
+  <meta charset="utf-8">
+  <title>Computergraphik ist toll!!!</title>
+
+
+  <!-- Hier steht der Quellcode des Vertex-Shaders -->
+  <script id="vertex-shader" type="x-shader/x-vertex">
 
 // hier werden die Attribute-Variablen angelegt, diese
 // werden bei jedem Aufruf des Vertex-Shaders mit den
@@ -117,9 +118,9 @@ void main()
 </script>
 
 
-<!-- und hier der Quellcode f�r den Fragment-Shader -->
+  <!-- und hier der Quellcode f�r den Fragment-Shader -->
 
-<script id="fragment-shader" type="x-shader/x-fragment">
+  <script id="fragment-shader" type="x-shader/x-fragment">
 
 // Bitgr��e von float definieren
 precision mediump float;
@@ -143,53 +144,53 @@ void main()
 
 </script>
 
-<!-- in diesem Schritt stehen ein paar Hilfsfunktionen zu
+  <!-- in diesem Schritt stehen ein paar Hilfsfunktionen zu
 WebGL -->
-<script type="text/javascript" src="./Common/webgl-utils.js"></script>
+  <script type="text/javascript" src="./Common/webgl-utils.js"></script>
 
-<!-- dieses Skript enth�lt Funktionen, um die Shader zu
+  <!-- dieses Skript enth�lt Funktionen, um die Shader zu
 kompilieren und zu einem Programm zu linken -->
-<script type="text/javascript" src="./Common/initShaders.js"></script>
+  <script type="text/javascript" src="./Common/initShaders.js"></script>
 
-<!-- dieses Skript enth�lt Hilfsfunktionen f�r das Rechnen mit
+  <!-- dieses Skript enth�lt Hilfsfunktionen f�r das Rechnen mit
 Vektoren und Matrizen in Javascript -->
-<script type="text/javascript" src="./Common/MV.js"></script>
+  <script type="text/javascript" src="./Common/MV.js"></script>
 
-<!-- dies ist unser eigentliches Skript, in dem der Code f�r
+  <!-- dies ist unser eigentliches Skript, in dem der Code f�r
 die "CPU-Seite" steht -->
-<script type="text/javascript" src="G23_D_1332937.js"></script>
+  <script type="text/javascript" src="G23_D_1332937.js"></script>
 
 </head>
 
 <body>
-<!-- Hier stehen die GUI-Elemente -->
+  <!-- Hier stehen die GUI-Elemente -->
 
-<div>
-<label id="fps">FPS</label>
-</div>
+  <div>
+    <label id="fps">FPS</label>
+  </div>
 
-<div>
-<select id="Cameralist" size="5"> 
-<option selected value=0>Originalkamera</option> 
-<option value=1>x-Achse</option> 
-<option value=2>y-Achse</option> 
-<option value=3>z-Achse</option> 
-<option value=4>Pyramidenspitze</option> 
-</select> 
-</div>
+  <div>
+    <select id="Cameralist" size="5">
+      <option selected value=0>Originalkamera</option>
+      <option value=1>x-Achse</option>
+      <option value=2>y-Achse</option>
+      <option value=3>z-Achse</option>
+      <option value=4>Pyramidenspitze</option>
+    </select>
+  </div>
 
-<div>
-<button id = "ButtonX">Rotate X</button>
-<button id = "ButtonY">Rotate Y</button>
-<button id = "ButtonZ">Rotate Z</button>
-<button id = "ButtonT">Rotate On/Off</button>
-</div>
+  <div>
+    <button id="ButtonX">Rotate X</button>
+    <button id="ButtonY">Rotate Y</button>
+    <button id="ButtonZ">Rotate Z</button>
+    <button id="ButtonT">Rotate On/Off</button>
+  </div>
 
-<!-- Hier wird der Bereich im Browser angelegt, in den gezeichnet wird -->
+  <!-- Hier wird der Bereich im Browser angelegt, in den gezeichnet wird -->
 
-<canvas id="gl-canvas" width="600" height="600">
-The HTML 5 Canvas is not supported by your browser. Please use another browser to view this page.
-</canvas>
+  <canvas id="gl-canvas" width="600" height="600">
+    The HTML 5 Canvas is not supported by your browser. Please use another browser to view this page.
+  </canvas>
 
 </body>
 
