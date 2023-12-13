@@ -390,7 +390,7 @@ var render = function () {
 
     // der Frame fertig gezeichnet ist, wird veranlasst, dass der nächste Frame gezeichnet wird. Dazu wird wieder
     // die die Funktion aufgerufen, welche durch die Variable render spezifiziert wird
-    // requestAnimFrame(render);
+    requestAnimFrame(render);
 }
 
 
