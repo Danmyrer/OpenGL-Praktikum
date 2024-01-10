@@ -34,7 +34,7 @@ attribute  vec3 vNormal;
 
 // Farbe des Vertex (für den Fall, dass keine 
 // Beleuchtungsrechnung durchgeführt wird
-attribute  vec4 vColor;
+attribute vec4 vColor;
 
 // Im Vertex-Shader wird ein Farbwert ermittelt und an
 // den Fragment-Shader übergeben
@@ -52,6 +52,8 @@ uniform vec4 diffuseProduct;
 
 // Position der Lichtquelle
 uniform vec4 lightPosition;
+
+uniform vec4 lightDiffuse;
 
 // Model-Matrix (für Transformation Objektkoordinaten zu
 // Weltkoordinaten)
@@ -76,7 +78,9 @@ void main()
   if (lighting) {
     // Beleuchtungsrechnung durchführen
 
-  
+    // Berechnung der diffusen Farbe auf basis der vertex-farbe
+    vec4 localDiffuseProduct = lightDiffuse * vColor;
+
     // Position Eckpunkt in Viewkoordinaten berechnen	
     vec3 pos = (viewMatrix * modelMatrix * vPosition).xyz;
     
@@ -93,7 +97,7 @@ void main()
     // Berechnung der diffusen Beleuchtung nach den Formeln
     // von Phong	
     float Kd = max( dot(L, N), 0.0 );
-    vec3  diffuse = Kd*diffuseProduct.rgb;
+    vec3  diffuse = Kd*localDiffuseProduct.rgb;
 
     // resultierende Farbe für Fragment-Shader bestimmen
     fColor = vec4(diffuse.xyz, 1.0);
@@ -105,7 +109,7 @@ void main()
     // der übergebene Farbwert wird einfach an Fragment-Shader
     // weiter gereicht
     fColor = vColor;
-
+    
  }
 
   // 	schließlich muss wie in jedem Vertex-Shader die

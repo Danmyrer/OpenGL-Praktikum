@@ -102,28 +102,28 @@
         // erstes Dreieck
         pointsArray.push(vertices[a]);
         normalsArray.push(normal);
-        colorsArray.push(colors[a]);
+        colorsArray.push(colors[a + (colors.length - 7)]);
 
         pointsArray.push(vertices[b]);
         normalsArray.push(normal);
-        colorsArray.push(colors[a]);
+        colorsArray.push(colors[a + (colors.length - 7)]);
 
         pointsArray.push(vertices[c]);
         normalsArray.push(normal);
-        colorsArray.push(colors[a]);
+        colorsArray.push(colors[a + (colors.length - 7)]);
 
         // zweites Dreieck
         pointsArray.push(vertices[a]);
         normalsArray.push(normal);
-        colorsArray.push(colors[a]);
+        colorsArray.push(colors[a + (colors.length - 7)]);
 
         pointsArray.push(vertices[c]);
         normalsArray.push(normal);
-        colorsArray.push(colors[a]);
+        colorsArray.push(colors[a + (colors.length - 7)]);
 
         pointsArray.push(vertices[d]);
         normalsArray.push(normal);
-        colorsArray.push(colors[a]);
+        colorsArray.push(colors[a + (colors.length - 7)]);
 
         // durch die beiden Dreiecke wurden 6 Eckpunkte in die Array eingetragen
         numVertices += 6;
@@ -134,7 +134,7 @@
     // Funktion, die einen Würfel zeichnet (Mittelpunkt liegt im Ursprung, Kantenlänge beträgt 1)
     //
 
-    function drawCube(pos = [5, 0, 1], rotAxis = [0, 0, 1], scl = [1, 1, 1], matCl = vec4(1.0, 1.0, 0.0, 1.0)) {
+    function drawCube(pos = [5, 0, 1], rotAxis = [0, 0, 1], scl = [1, 1, 1], matCl = vec4(1.0, 0.0, 0.0, 1.0)) {
 
         // zunächst werden die Koordinaten der 8 Eckpunkte des Würfels definiert
         vertices = [
@@ -154,18 +154,11 @@
             vertices[i] = mult(rotate(thetaGlobal, rotAxis), vertices[i]);
             vertices[i] = mult(translate(pos[0], pos[1], pos[2]), vertices[i]);
         }
-        
-        // hier werden verschiedene Farben definiert (je eine pro Eckpunkt)
-        colors = [
-            vec4(1.0, 0.0, 0.0, 1.0),
-            vec4(1.0, 1.0, 0.0, 1.0),
-            vec4(0.0, 1.0, 0.0, 1.0),
-            vec4(0.0, 1.0, 1.0, 1.0),
-            vec4(0.0, 0.0, 1.0, 1.0),
-            vec4(1.0, 0.0, 1.0, 1.0),
-            vec4(1.0, 0.0, 1.0, 1.0),
-            vec4(1.0, 1.0, 0.0, 1.0)
-        ];
+
+        // Hier wird die Farbe des Würfels für später gespeichert
+        for (var i = 0; i < 7; i++) {
+            colors.push(matCl);
+        }
 
         // und hier werden die Daten der 6 Seiten des Würfels in die globalen Arrays eingetragen
         // jede Würfelseite erhält eine andere Farbe
@@ -176,10 +169,7 @@
         quad(4, 5, 6, 7);
         quad(5, 4, 0, 1);
 
-
-
         // die eingetragenen Werte werden an den Shader übergeben
-
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW);
 
@@ -283,6 +273,9 @@
         // Übergabe des diffuseProduct
         gl.uniform4fv(gl.getUniformLocation(program, "diffuseProduct"), flatten(diffuseProduct));
 
+        // Übergabe der LightDiffuse
+        gl.uniform4fv(gl.getUniformLocation(program, "lightDiffuse"), flatten(lightDiffuse));
+
     }
 
 
@@ -313,41 +306,39 @@
         colorsArray.length = 0;
         normalsArray.length = 0;
 
+        drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2]);
+        drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1], vec4(0.0, 0.0, 1.0, 1.0));
 
         // jetzt werden die Arrays mit der entsprechenden Zeichenfunktion mit Daten gefüllt
-        drawCube();
         
         // es wird festgelegt, ob eine Beleuchtungsrechnung für das Objekt durchgeführt wird oder nicht
         var lighting = true; // Beleuchtungsrechnung wird durchgeführt
-
+        
         // die Information über die Beleuchtungsrechnung wird an die Shader weitergegeben
         gl.uniform1i(gl.getUniformLocation(program, "lighting"), lighting);
-
+        
         if (lighting) {
             // es soll also eine Beleuchtungsrechnung durchgeführt werden
-
+            
             // die Materialfarbe für diffuse Reflektion wird spezifiziert
             var materialDiffuse = vec4(1.0, 1.0, 0.0, 1.0);
-
+            
             // die Beleuchtung wird durchgeführt und das Ergebnis an den Shader übergeben
             calculateLights(materialDiffuse);
-            
         } else {
 
             // es gibt keine Beleuchtungsrechnung, die vordefinierten Farben wurden bereits
             // in der Draw-Funktion übergeben
             ;
-
         };
-
-        drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2]);
+        
         // es muss noch festgelegt werden, wo das Objekt sich in Weltkoordinaten befindet,
         // d.h. die Model-Matrix muss errechnet werden. Dazu werden wieder Hilfsfunktionen
         // für die Matrizenrechnung aus dem externen Javascript MV.js verwendet
-
+        
         // Initialisierung mit der Einheitsmatrix 
         model = mat4();
-
+        
         // Das Objekt wird am Ende noch um die x-Achse rotiert 
         model = mult(model, rotate(theta[0], [1, 0, 0]));
 
