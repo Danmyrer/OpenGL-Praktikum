@@ -134,7 +134,7 @@
     // Funktion, die einen Würfel zeichnet (Mittelpunkt liegt im Ursprung, Kantenlänge beträgt 1)
     //
 
-    function drawCube(pos = [5, 0, 1], rotAxis = [0, 0, 1], scl = [1, 1, 1], matCl = vec4(1.0, 0.0, 0.0, 1.0)) {
+    function drawCube(pos = [5, 0, 1], rotAxis = [0, 0, 1], scl = [1, 1, 1], matCl = vec4(1.0, 1.0, 0.0, 1.0), speed = 1) {
 
         // zunächst werden die Koordinaten der 8 Eckpunkte des Würfels definiert
         vertices = [
@@ -151,7 +151,7 @@
         // Rotation des Würfels um seine z-Achse
         for (var i = 0; i < vertices.length; i++) {
             vertices[i] = mult(scalem(scl[0], scl[1], scl[2]), vertices[i]);
-            vertices[i] = mult(rotate(thetaGlobal, rotAxis), vertices[i]);
+            vertices[i] = mult(rotate(thetaGlobal * speed, rotAxis), vertices[i]);
             vertices[i] = mult(translate(pos[0], pos[1], pos[2]), vertices[i]);
         }
 
@@ -306,8 +306,8 @@
         colorsArray.length = 0;
         normalsArray.length = 0;
 
-        drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2]);
-        drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1], vec4(0.0, 0.0, 1.0, 1.0));
+        drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1]);
+        drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2], vec4(0.0, 1.0, 0.0, 1.0), 2);
 
         // jetzt werden die Arrays mit der entsprechenden Zeichenfunktion mit Daten gefüllt
         
