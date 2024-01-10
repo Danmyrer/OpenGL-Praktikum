@@ -212,7 +212,7 @@
         gl.enableVertexAttribArray(cPosition);
     }
 
-    function drawPyramid(pos = [0, 0, 0], scl = [1, 1, 1], matCl = vec4(1.0, 1.0, 1.0, 1.0)) {
+    function drawPyramid(pos = [0, 0, 0], scl = [1, 1, 1], matCl = vec4(1.0, 1.0, 1.0, 1.0), rot = 0, rotAx = [0, 1, 0]) {
 
         vertices = [
             vec4(0.5, 0, 0.5, 1.0), // 0
@@ -225,6 +225,7 @@
         // Transformationen
         for (var i = 0; i < vertices.length; i++) {
             vertices[i] = mult(scalem(scl[0], scl[1], scl[2]), vertices[i]);
+            vertices[i] = mult(rotate(rot, rotAx), vertices[i]);
             vertices[i] = mult(translate(pos[0], pos[1], pos[2]), vertices[i]);
         }
 
@@ -377,6 +378,8 @@
         drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1]);
         drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2], vec4(0.0, 1.0, 0.0, 1.0), 2);
         drawPyramid([0, 0, 0], [4, 4, 2], vec4(1.0, 1.0, 0.0, 1.0));
+        drawPyramid([0, 8, 0], [4, 4, 2], vec4(1.0, 0.0, 0.0, 1.0), 180, [1, 0, 0]);
+        drawPyramid([0, 6.666, 0.666], [1.6, 1.6, 0.8], vec4(0.0, 0.0, 1.0, 1.0), 104, [1, 0, 0]);
 
         // jetzt werden die Arrays mit der entsprechenden Zeichenfunktion mit Daten gefüllt
         
