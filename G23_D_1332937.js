@@ -129,6 +129,26 @@
         numVertices += 6;
     }
 
+    function vertex(a, b, c) {
+        var t1 = subtract(vertices[b], vertices[a]);
+        var t2 = subtract(vertices[c], vertices[a]);
+        var normal = cross(t1, t2);
+
+        pointsArray.push(vertices[a]);
+        normalsArray.push(normal);
+        colorsArray.push(colors[a + (colors.length - 4)]);
+
+        pointsArray.push(vertices[b]);
+        normalsArray.push(normal);
+        colorsArray.push(colors[a + (colors.length - 4)]);
+
+        pointsArray.push(vertices[c]);
+        normalsArray.push(normal);
+        colorsArray.push(colors[a + (colors.length - 4)]);
+
+        numVertices += 3;
+    }
+
 
     //
     // Funktion, die einen Würfel zeichnet (Mittelpunkt liegt im Ursprung, Kantenlänge beträgt 1)
@@ -156,7 +176,7 @@
         }
 
         // Hier wird die Farbe des Würfels für später gespeichert
-        for (var i = 0; i < 7; i++) {
+        for (var i = 0; i < 6; i++) {
             colors.push(matCl);
         }
 
@@ -192,6 +212,54 @@
         gl.enableVertexAttribArray(cPosition);
     }
 
+    function drawPyramid(pos = [0, 0, 0], scl = [1, 1, 1], matCl = vec4(1.0, 1.0, 1.0, 1.0)) {
+
+        vertices = [
+            vec4(0.5, 0, 0.5, 1.0), // 0
+            vec4(0.5, 0, -0.5, 1.0), // 1
+            vec4(-0.5, 0, 0.5, 1.0), // 2
+            vec4(-0.5, 0, -0.5, 1.0), // 3
+            vec4(0.0, 1.0, 0.0, 1.0) // 4
+        ]
+
+        // Transformationen
+        for (var i = 0; i < vertices.length; i++) {
+            vertices[i] = mult(scalem(scl[0], scl[1], scl[2]), vertices[i]);
+            vertices[i] = mult(translate(pos[0], pos[1], pos[2]), vertices[i]);
+        }
+
+        for (var i = 0; i < 6; i++) {
+            colors.push(matCl);
+        }
+
+        quad(2, 3, 1, 0);
+        vertex(0, 1, 4);
+        vertex(0, 4, 2);
+        vertex(2, 4, 3);
+        vertex(3, 4, 1);
+
+        // die eingetragenen Werte werden an den Shader übergeben
+        gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW);
+
+        var vNormal = gl.getAttribLocation(program, "vNormal");
+        gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(vNormal);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
+
+        var vPosition = gl.getAttribLocation(program, "vPosition");
+        gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(vPosition);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(colorsArray), gl.STATIC_DRAW);
+
+        var cPosition = gl.getAttribLocation(program, "vColor");
+        gl.vertexAttribPointer(cPosition, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(cPosition);
+    }
 
     /*** Funktionen zum Aufbau der Szene */
 
@@ -308,6 +376,7 @@
 
         drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1]);
         drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2], vec4(0.0, 1.0, 0.0, 1.0), 2);
+        drawPyramid([0, 0, 0], [4, 4, 2], vec4(1.0, 1.0, 0.0, 1.0));
 
         // jetzt werden die Arrays mit der entsprechenden Zeichenfunktion mit Daten gefüllt
         
