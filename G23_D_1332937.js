@@ -410,18 +410,16 @@
         // dies ist auch schon beim ersten Objekt zu tun, denn aus den
         // Berechnungen eines früheren Frames könnten hier schon Werte in den Arrays stehen
         // auch die Anzahl der Eckpunkte des zu zeichnenden Objekts wird auf 0 zurückgesetzt
-
+        
         numVertices = 0;
         pointsArray.length = 0;
         colorsArray.length = 0;
         normalsArray.length = 0;
-
+        
         drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2], vec4(0.0, 1.0, 0.0, 1.0), 2);
         drawPyramid([0, 0, 0], [4, 4, 2], vec4(1.0, 1.0, 0.0, 1.0));
         drawPyramid([0, 8, 0], [4, 4, 2], vec4(1.0, 0.0, 0.0, 1.0), 180, [1, 0, 0]);
         drawPyramid([0, 6.666, 0.666], [1.6, 1.6, 0.8], vec4(0.0, 0.0, 1.0, 1.0), 104, [1, 0, 0]);
-        
-        // jetzt werden die Arrays mit der entsprechenden Zeichenfunktion mit Daten gefüllt
         
         // es wird festgelegt, ob eine Beleuchtungsrechnung für das Objekt durchgeführt wird oder nicht
         var lighting = true; // Beleuchtungsrechnung wird durchgeführt
@@ -481,7 +479,6 @@
         // außerdem wird OpenGL mitgeteilt, dass immer drei Vertices zu einem Dreieck im Rasterisierungsschritt
         // zusammengesetzt werden sollen
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
-
         drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1], vec4(0.0, 0.0, 0.0, 1.0), 1, true);
         
         // es wird festgelegt, ob eine Beleuchtungsrechnung für das Objekt durchgeführt wird oder nicht
@@ -489,11 +486,10 @@
         
         // die Information über die Beleuchtungsrechnung wird an die Shader weitergegeben
         gl.uniform1i(gl.getUniformLocation(program, "lighting"), lighting);
-
+        
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
     } // Ende der Funktion displayScene()
-    
-    
+
     //
     // hier wird eine namenslose Funktion definiert, die durch die Variable render zugegriffen werden kann.
     // diese Funktion wird für jeden Frame aufgerufen
@@ -581,6 +577,17 @@
         document.getElementById("ButtonY").onclick = function () { axis = 1; };
         document.getElementById("ButtonZ").onclick = function () { axis = 2; };
         document.getElementById("ButtonT").onclick = function () { enableRotation = !enableRotation };
+
+        // Laden von Texturen
+        var img = document.getElementById("texImage");
+        var t = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, t);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.uniform1i(gl.getUniformLocation(program, "src"), 0);
 
         // jetzt kann mit dem Rendern der Szene begonnen werden  
         render();
