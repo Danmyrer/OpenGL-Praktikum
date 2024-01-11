@@ -154,7 +154,7 @@
     // Funktion, die einen Würfel zeichnet (Mittelpunkt liegt im Ursprung, Kantenlänge beträgt 1)
     //
 
-    function drawCube(pos = [5, 0, 1], rotAxis = [0, 0, 1], scl = [1, 1, 1], matCl = vec4(1.0, 1.0, 0.0, 1.0), speed = 1) {
+    function drawCube(pos = [5, 0, 1], rotAxis = [0, 0, 1], scl = [1, 1, 1], matCl = vec4(1.0, 1.0, 0.0, 1.0), speed = 1, cpu = false) {
 
         // zunächst werden die Koordinaten der 8 Eckpunkte des Würfels definiert
         vertices = [
@@ -176,8 +176,18 @@
         }
 
         // Hier wird die Farbe des Würfels für später gespeichert
-        for (var i = 0; i < 6; i++) {
-            colors.push(matCl);
+        if(!cpu) {
+            for (var i = 0; i < 6; i++) {
+                colors.push(matCl);
+            }
+        }
+        else {
+            colors.push(new vec4(1.0, 0.0, 0.0, 1.0));
+            colors.push(new vec4(0.0, 0.0, 0.0, 1.0));
+            colors.push(new vec4(0.0, 0.0, 0.0, 1.0));
+            colors.push(new vec4(1.0, 0.0, 0.0, 1.0));
+            colors.push(new vec4(0.0, 0.0, 0.0, 1.0));
+            colors.push(new vec4(0.0, 0.0, 0.0, 1.0));
         }
 
         // und hier werden die Daten der 6 Seiten des Würfels in die globalen Arrays eingetragen
@@ -282,12 +292,32 @@
         // Vektor, der nach oben zeigt  
         var upv;
 
-        if (camIndex == 0) {
-            // hier wird die erste Kameraposition definiert
-            eye = vec3(12.0, 12.0, 4.0);
-            vrp = vec3(0.0, 0.0, 0.0);
-            upv = vec3(0.0, 1.0, 0.0);
-        };
+        switch(camIndex) {
+            case 4:
+                eye = vec3(12.0, 12.0, 4.0);
+                vrp = vec3(0.0, 4.0, 0.0);
+                upv = vec3(0.0, 1.0, 0.0);
+                break;
+            case 3: // z-Achse
+                eye = vec3(0.0, 0.0, 10.0);
+                vrp = vec3(0.0, 0.0, 0.0);
+                upv = vec3(0.0, 1.0, 0.0);
+                break;
+            case 2: // y-Achse
+                eye = vec3(0.0, 10.0, 0.0);
+                vrp = vec3(0.0, 0.0, 0.0);
+                upv = vec3(0.0, 0.0, 1.0);
+                break;
+            case 1: // x-Achse
+                eye = vec3(10.0, 0.0, 0.0);
+                vrp = vec3(0.0, 0.0, 0.0);
+                upv = vec3(0.0, 1.0, 0.0);
+                break;
+            default: // default
+                eye = vec3(12.0, 12.0, 4.0);
+                vrp = vec3(0.0, 0.0, 0.0);
+                upv = vec3(0.0, 1.0, 0.0);
+        }
 
         // hier wird die Viewmatrix unter Verwendung einer Hilfsfunktion berechnet,
         // die in einem externen Javascript (MV.js) definiert wird
@@ -317,7 +347,7 @@
     // der Parameter materialDiffuse ist ein vec4 und gibt die Materialfarbe für die diffuse Reflektion an
     //
 
-    function calculateLights(materialDiffuse) {
+    function calculateLights(materialDiffuse, materialSpecular) {
         // zunächst werden die Lichtquellen spezifiziert (bei uns gibt es eine Punktlichtquelle)
 
         // die Position der Lichtquelle (in Weltkoordinaten)
@@ -326,12 +356,15 @@
         // die Farbe der Lichtquelle im diffusen Licht
         var lightDiffuse = vec4(1.0, 1.0, 1.0, 1.0);
 
-
         // dann wird schon ein Teil der Beleuchtungsrechnung ausgeführt - das könnte man auch im Shader machen
         // aber dort würde diese Rechnung für jeden Eckpunkt (unnötigerweise) wiederholt werden. Hier rechnen wir
         // das Produkt aus lightDiffuse und materialDiffuse einmal aus und übergeben das Resultat. Zur Multiplikation
         // der beiden Vektoren nutzen wir die Funktion mult aus einem externen Javascript (MV.js)
         var diffuseProduct = mult(lightDiffuse, materialDiffuse);
+
+        var shiny = 100;
+
+        var ambientIntensity = 0.3;
 
         // die Werte für die Beleuchtungsrechnung werden an die Shader übergeben
 
@@ -345,6 +378,14 @@
         // Übergabe der LightDiffuse
         gl.uniform4fv(gl.getUniformLocation(program, "lightDiffuse"), flatten(lightDiffuse));
 
+        // Übergabe der materialSpecular
+        gl.uniform4fv(gl.getUniformLocation(program, "materialSpecular"), flatten(materialSpecular));
+
+        // Übergabe der shininess
+        gl.uniform1f(gl.getUniformLocation(program, "shiny"), shiny);
+
+        // Übergabe der ambientIntensity
+        gl.uniform1f(gl.getUniformLocation(program, "ambient"), ambientIntensity);
     }
 
 
@@ -375,12 +416,11 @@
         colorsArray.length = 0;
         normalsArray.length = 0;
 
-        drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1]);
         drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2], vec4(0.0, 1.0, 0.0, 1.0), 2);
         drawPyramid([0, 0, 0], [4, 4, 2], vec4(1.0, 1.0, 0.0, 1.0));
         drawPyramid([0, 8, 0], [4, 4, 2], vec4(1.0, 0.0, 0.0, 1.0), 180, [1, 0, 0]);
         drawPyramid([0, 6.666, 0.666], [1.6, 1.6, 0.8], vec4(0.0, 0.0, 1.0, 1.0), 104, [1, 0, 0]);
-
+        
         // jetzt werden die Arrays mit der entsprechenden Zeichenfunktion mit Daten gefüllt
         
         // es wird festgelegt, ob eine Beleuchtungsrechnung für das Objekt durchgeführt wird oder nicht
@@ -394,15 +434,19 @@
             
             // die Materialfarbe für diffuse Reflektion wird spezifiziert
             var materialDiffuse = vec4(1.0, 1.0, 0.0, 1.0);
+
+            var materialSpecular = vec4(1.0, 1.0, 1.0, 1.0);
             
             // die Beleuchtung wird durchgeführt und das Ergebnis an den Shader übergeben
-            calculateLights(materialDiffuse);
+            calculateLights(materialDiffuse, materialSpecular);
         } else {
-
+            
             // es gibt keine Beleuchtungsrechnung, die vordefinierten Farben wurden bereits
             // in der Draw-Funktion übergeben
             ;
         };
+
+        // Objekte mit CPU-Seitigem rendering
         
         // es muss noch festgelegt werden, wo das Objekt sich in Weltkoordinaten befindet,
         // d.h. die Model-Matrix muss errechnet werden. Dazu werden wieder Hilfsfunktionen
@@ -413,35 +457,43 @@
         
         // Das Objekt wird am Ende noch um die x-Achse rotiert 
         model = mult(model, rotate(theta[0], [1, 0, 0]));
-
+        
         // Zuvor wird das Objekt um die y-Achse rotiert
         model = mult(model, rotate(theta[1], [0, 1, 0]));
-
+        
         // Als erstes wird das Objekt um die z-Achse rotiert 
         model = mult(model, rotate(theta[2], [0, 0, 1]));
-
+        
         // die Model-Matrix ist fertig berechnet und wird an die Shader übergeben 
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelMatrix"), false, flatten(model));
-
+        
         // jetzt wird noch die Matrix errechnet, welche die Normalen transformiert
         normalMat = mat4();
         normalMat = mult(view, model);
         normalMat = inverse(normalMat);
         normalMat = transpose(normalMat);
-
+        
         // die Normal-Matrix ist fertig berechnet und wird an die Shader übergeben 
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "normalMatrix"), false, flatten(normalMat));
-
+        
         // schließlich wird alles gezeichnet. Dabei wird der Vertex-Shader numVertices mal aufgerufen
         // und dabei die jeweiligen attribute - Variablen für jeden einzelnen Vertex gesetzt
         // außerdem wird OpenGL mitgeteilt, dass immer drei Vertices zu einem Dreieck im Rasterisierungsschritt
         // zusammengesetzt werden sollen
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
 
+        drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1], vec4(0.0, 0.0, 0.0, 1.0), 1, true);
+        
+        // es wird festgelegt, ob eine Beleuchtungsrechnung für das Objekt durchgeführt wird oder nicht
+        var lighting = false; // Beleuchtungsrechnung wird durchgeführt
+        
+        // die Information über die Beleuchtungsrechnung wird an die Shader weitergegeben
+        gl.uniform1i(gl.getUniformLocation(program, "lighting"), lighting);
 
+        gl.drawArrays(gl.TRIANGLES, 0, numVertices);
     } // Ende der Funktion displayScene()
-
-
+    
+    
     //
     // hier wird eine namenslose Funktion definiert, die durch die Variable render zugegriffen werden kann.
     // diese Funktion wird für jeden Frame aufgerufen
