@@ -19,6 +19,9 @@
     // Referenz auf WebGL-Kontext, über die OpenGL Befehle ausgeführt werden
     var gl;
 
+    let shininess = 100;
+    let ambientIntensity = 0.3;
+
     // Referenz auf die Shaderprogramme
     var program;
 
@@ -386,10 +389,6 @@
         // der beiden Vektoren nutzen wir die Funktion mult aus einem externen Javascript (MV.js)
         var diffuseProduct = mult(lightDiffuse, materialDiffuse);
 
-        var shiny = 100;
-
-        var ambientIntensity = 0.3;
-
         // die Werte für die Beleuchtungsrechnung werden an die Shader übergeben
 
         // Übergabe der Position der Lichtquelle
@@ -406,7 +405,7 @@
         gl.uniform4fv(gl.getUniformLocation(program, "materialSpecular"), flatten(materialSpecular));
 
         // Übergabe der shininess
-        gl.uniform1f(gl.getUniformLocation(program, "shiny"), shiny);
+        gl.uniform1f(gl.getUniformLocation(program, "shiny"), shininess);
 
         // Übergabe der ambientIntensity
         gl.uniform1f(gl.getUniformLocation(program, "ambient"), ambientIntensity);
@@ -467,7 +466,7 @@
 
     function displayScene() {
         initDisplayScene();
-        
+
         // Definieren der Farben
         let col_yellow = vec4(1.0, 1.0, 0.0, 1.0);
         let col_white = vec4(1.0, 1.0, 1.0, 1.0);
@@ -483,7 +482,7 @@
         // Gelbe Pyramide
         setTexture(false);
         drawPyramid([0, 0, 0], [4, 4, 2], vec4(1.0, 1.0, 0.0, 1.0));
-        drawWithLight(col_yellow, col_white);
+        drawWithLight(col_yellow, col_blue);
 
         // Rote Pyramide
         drawPyramid([0, 8, 0], [4, 4, 2], vec4(1.0, 0.0, 0.0, 1.0), 180, [1, 0, 0]);
@@ -492,20 +491,19 @@
         // Blaue Pyramide
         drawPyramid([0, 6.666, 0.666], [1.6, 1.6, 0.8], vec4(0.0, 0.0, 1.0, 1.0), 104, [1, 0, 0]);
         drawWithLight(col_blue, col_white);
-        
+
         // CPU-Würfel
         setLighting(false);
         drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1], vec4(0.0, 0.0, 0.0, 1.0), 1, true);
         drawWithLight();
 
-        //drawTeapot();
-        //gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+        // Teekanne
+        setLighting(true);
+        drawWithLight(col_yellow, col_white);
+        drawTeapot();   // Hier muss die lichtberechnung VORHER stattfinden,
+                        // da der Kanne keine explizite Farbe zugeordnet ist
+        gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
-
-    //
-    // hier wird eine namenslose Funktion definiert, die durch die Variable render zugegriffen werden kann.
-    // diese Funktion wird für jeden Frame aufgerufen
-    //
 
     var render = function () {
 
@@ -593,6 +591,13 @@
         document.getElementById("ButtonY").onclick = function () { axis = 1; };
         document.getElementById("ButtonZ").onclick = function () { axis = 2; };
         document.getElementById("ButtonT").onclick = function () { enableRotation = !enableRotation };
+        document.getElementById("SliderS").oninput = function(event){shininess = event.target.value;};
+        document.getElementById("SliderA").oninput = function(event){ambientIntensity = (event.target.value/100);};
+        document.getElementById("SliderT1").oninput = function(event){cartoon1 = (event.target.value/100);};
+        document.getElementById("SliderT2").oninput = function(event){cartoon2 = (event.target.value/100);};
+
+        document.getElementById("SliderS").value = shininess;
+        document.getElementById("SliderA").value = ambientIntensity * 100;
 
         // Laden von Texturen
         var img = document.getElementById("texImage");

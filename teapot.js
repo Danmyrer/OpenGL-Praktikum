@@ -121,7 +121,7 @@ function drawTeapot() {
 // dieser Aufruf sollte in der Funktion init hinzugefügt werden, damit die Daten für
 // für die Teekanne einmalig aus der Datei ausgelesen werden
 
-loadTeapot();
+//loadTeapot();
 
 
 

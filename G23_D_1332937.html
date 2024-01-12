@@ -225,6 +225,21 @@ die "CPU-Seite" steht -->
     <button id="ButtonT">Rotate On/Off</button>
   </div>
 
+  <div>
+    Thresholds for Cartoon Shading:
+    <input type="range" id="SliderT1" min="0" max="100">
+    <input type="range" id="SliderT2" min="0" max="100">
+    <label id="c1">1</label>, <label id="c2">1</label>
+    <br />
+    Ambient Intensity:
+    <input type="range" id="SliderA" min="0" max="100">
+    <label id="ai">1</label>
+    <br />
+    Shininess:
+    <input type="range" id="SliderS" min="0" max="100">
+    <label id="sh">100</label>
+    </div>
+
   <!-- Hier wird der Bereich im Browser angelegt, in den gezeichnet wird -->
 
   <canvas id="gl-canvas" width="600" height="600">
