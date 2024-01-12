@@ -56,6 +56,9 @@
     // Array, in dem die Farbwerte je Eckpunkt der zu zeichnenden Objekte eingetragen werden
     var colorsArray = [];
 
+    // Array ,in dem die Texturkoordinaten je Eckpunkt der zu zeichenenedn Objekte eingetrageen werden.
+    var texArray = [];
+
     // Variablen für die Drehung des Würfels
     var axis = 0;
     var theta = [0, 0, 0];
@@ -75,6 +78,9 @@
     // OpenGL-Speicherobjekt f�r Normalen
     var nBuffer;
 
+    // OpenGL-Speicherobjekt für Texturen
+    var tBuffer;
+
     /*** Hilfsfunktionen zum Zeichnen von Objekten */
 
 
@@ -86,7 +92,7 @@
     // Übergeben werden für Indices auf die vier Eckpunkte des Vierecks
     //
 
-    function quad(a, b, c, d) {
+    function quad(a, b, c, d, tex = false) {
 
         // zunächst wird die Normale des Vierecks berechnet. t1 ist der Vektor von Eckpunkt a zu Eckpunkt b
         // t2 ist der Vektor von Eckpunkt von Eckpunkt a zu Eckpunkt c. Die Normale ist dann das 
@@ -125,6 +131,17 @@
         normalsArray.push(normal);
         colorsArray.push(colors[a + (colors.length - 7)]);
 
+        texArray.push(
+            // Erstes Dreieck
+            0.0, 0.0, 
+            1.0, 0.0, 
+            1.0, 1.0, 
+            // Zweites Dreieck
+            0.0, 0.0, 
+            1.0, 1.0, 
+            0.0, 1.0
+        );
+
         // durch die beiden Dreiecke wurden 6 Eckpunkte in die Array eingetragen
         numVertices += 6;
     }
@@ -154,7 +171,7 @@
     // Funktion, die einen Würfel zeichnet (Mittelpunkt liegt im Ursprung, Kantenlänge beträgt 1)
     //
 
-    function drawCube(pos = [5, 0, 1], rotAxis = [0, 0, 1], scl = [1, 1, 1], matCl = vec4(1.0, 1.0, 0.0, 1.0), speed = 1, cpu = false) {
+    function drawCube(pos = [5, 0, 1], rotAxis = [0, 0, 1], scl = [1, 1, 1], matCl = vec4(1.0, 1.0, 0.0, 1.0), speed = 1, cpu = false, tex = false) {
 
         // zunächst werden die Koordinaten der 8 Eckpunkte des Würfels definiert
         vertices = [
@@ -192,12 +209,12 @@
 
         // und hier werden die Daten der 6 Seiten des Würfels in die globalen Arrays eingetragen
         // jede Würfelseite erhält eine andere Farbe
-        quad(1, 0, 3, 2);
-        quad(2, 3, 7, 6);
-        quad(3, 0, 4, 7);
-        quad(6, 5, 1, 2);
-        quad(4, 5, 6, 7);
-        quad(5, 4, 0, 1);
+        quad(1, 0, 3, 2, tex);
+        quad(2, 3, 7, 6, tex);
+        quad(3, 0, 4, 7, tex);
+        quad(6, 5, 1, 2, tex);
+        quad(4, 5, 6, 7, tex);
+        quad(5, 4, 0, 1, tex);
 
         // die eingetragenen Werte werden an den Shader übergeben
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
@@ -214,6 +231,13 @@
         gl.vertexAttribPointer(vPosition, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(vPosition);
 
+        gl.bindBuffer(gl.ARRAY_BUFFER, tBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(texArray), gl.STATIC_DRAW);
+
+        var vTexture = gl.getAttribLocation(program, "vTexture");
+        gl.vertexAttribPointer(vTexture, 2, gl.FLOAT, false, 0, 0),
+        gl.enableVertexAttribArray(vTexture);
+    
         gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, flatten(colorsArray), gl.STATIC_DRAW);
 
@@ -394,61 +418,28 @@
     // 
 
     function displayScene() {
-
-
-        //
-        // Die Kamera für das Bild wird gesetzt
-
-        // View-Matrix und Projection-Matrix zur Kamera berechnen
         setCamera();
-
-
-        //
-        // Zeichnen des ersten Objekts (Würfel)
-
-        // zunächst werden die Daten für die globalen Arrays gelöscht
-        // dies ist auch schon beim ersten Objekt zu tun, denn aus den
-        // Berechnungen eines früheren Frames könnten hier schon Werte in den Arrays stehen
-        // auch die Anzahl der Eckpunkte des zu zeichnenden Objekts wird auf 0 zurückgesetzt
         
         numVertices = 0;
         pointsArray.length = 0;
         colorsArray.length = 0;
         normalsArray.length = 0;
         
-        drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2], vec4(0.0, 1.0, 0.0, 1.0), 2);
-        drawPyramid([0, 0, 0], [4, 4, 2], vec4(1.0, 1.0, 0.0, 1.0));
-        drawPyramid([0, 8, 0], [4, 4, 2], vec4(1.0, 0.0, 0.0, 1.0), 180, [1, 0, 0]);
-        drawPyramid([0, 6.666, 0.666], [1.6, 1.6, 0.8], vec4(0.0, 0.0, 1.0, 1.0), 104, [1, 0, 0]);
+        drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2], vec4(0.0, 1.0, 0.0, 1.0), 2, false, true);
         
-        // es wird festgelegt, ob eine Beleuchtungsrechnung für das Objekt durchgeführt wird oder nicht
-        var lighting = true; // Beleuchtungsrechnung wird durchgeführt
-        
-        // die Information über die Beleuchtungsrechnung wird an die Shader weitergegeben
+        var lighting = true;
+        var isTexture = true;
+        gl.uniform1i(gl.getUniformLocation(program, "fIsTexture"), isTexture);
         gl.uniform1i(gl.getUniformLocation(program, "lighting"), lighting);
         
         if (lighting) {
-            // es soll also eine Beleuchtungsrechnung durchgeführt werden
-            
             // die Materialfarbe für diffuse Reflektion wird spezifiziert
             var materialDiffuse = vec4(1.0, 1.0, 0.0, 1.0);
-
             var materialSpecular = vec4(1.0, 1.0, 1.0, 1.0);
             
             // die Beleuchtung wird durchgeführt und das Ergebnis an den Shader übergeben
             calculateLights(materialDiffuse, materialSpecular);
-        } else {
-            
-            // es gibt keine Beleuchtungsrechnung, die vordefinierten Farben wurden bereits
-            // in der Draw-Funktion übergeben
-            ;
-        };
-
-        // Objekte mit CPU-Seitigem rendering
-        
-        // es muss noch festgelegt werden, wo das Objekt sich in Weltkoordinaten befindet,
-        // d.h. die Model-Matrix muss errechnet werden. Dazu werden wieder Hilfsfunktionen
-        // für die Matrizenrechnung aus dem externen Javascript MV.js verwendet
+        }
         
         // Initialisierung mit der Einheitsmatrix 
         model = mat4();
@@ -474,21 +465,23 @@
         // die Normal-Matrix ist fertig berechnet und wird an die Shader übergeben 
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "normalMatrix"), false, flatten(normalMat));
         
-        // schließlich wird alles gezeichnet. Dabei wird der Vertex-Shader numVertices mal aufgerufen
-        // und dabei die jeweiligen attribute - Variablen für jeden einzelnen Vertex gesetzt
-        // außerdem wird OpenGL mitgeteilt, dass immer drei Vertices zu einem Dreieck im Rasterisierungsschritt
-        // zusammengesetzt werden sollen
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
-        drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1], vec4(0.0, 0.0, 0.0, 1.0), 1, true);
         
-        // es wird festgelegt, ob eine Beleuchtungsrechnung für das Objekt durchgeführt wird oder nicht
-        var lighting = false; // Beleuchtungsrechnung wird durchgeführt
+        var isTexture = false;
+        gl.uniform1i(gl.getUniformLocation(program, "fIsTexture"), isTexture);
         
-        // die Information über die Beleuchtungsrechnung wird an die Shader weitergegeben
+        drawPyramid([0, 0, 0], [4, 4, 2], vec4(1.0, 1.0, 0.0, 1.0));
+        drawPyramid([0, 8, 0], [4, 4, 2], vec4(1.0, 0.0, 0.0, 1.0), 180, [1, 0, 0]);
+        drawPyramid([0, 6.666, 0.666], [1.6, 1.6, 0.8], vec4(0.0, 0.0, 1.0, 1.0), 104, [1, 0, 0]);
+        gl.drawArrays(gl.TRIANGLES, 0, numVertices);
+        
+        var lighting = false;
         gl.uniform1i(gl.getUniformLocation(program, "lighting"), lighting);
         
+        drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1], vec4(0.0, 0.0, 0.0, 1.0), 1, true);
+        
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
-    } // Ende der Funktion displayScene()
+    }
 
     //
     // hier wird eine namenslose Funktion definiert, die durch die Variable render zugegriffen werden kann.
@@ -569,6 +562,7 @@
         vBuffer = gl.createBuffer();
         nBuffer = gl.createBuffer();
         cBuffer = gl.createBuffer();
+        tBuffer = gl.createBuffer();
 
         // die Callbacks für das Anklicken der Buttons wird festgelegt
         // je nachdem, ob man den x-Achsen, y-Achsen oder z-Achsen-Button klickt, hat

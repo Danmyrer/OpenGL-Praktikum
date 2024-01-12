@@ -36,6 +36,8 @@ attribute  vec3 vNormal;
 // Beleuchtungsrechnung durchgeführt wird
 attribute vec4 vColor;
 
+attribute vec2 vTexture;
+
 // Im Vertex-Shader wird ein Farbwert ermittelt und an
 // den Fragment-Shader übergeben
 varying vec4 fColor;
@@ -77,48 +79,54 @@ uniform float shiny;
 
 uniform float ambient;
 
+attribute float isTexture;
+varying float v_isTexture;
+varying vec2 fTexture;
+
+
 void main()
 {
+  v_isTexture = isTexture;
   if (lighting) {
     // Beleuchtungsrechnung durchführen
-
+    
     // Berechnung der diffusen Farbe auf basis der vertex-farbe
     vec4 localDiffuseProduct = lightDiffuse * vColor;
-
+    
     // Position Eckpunkt in Viewkoordinaten berechnen	
     vec3 pos = (viewMatrix * modelMatrix * vPosition).xyz;
     
     // Position der Lichtquelle
     vec3 light = (viewMatrix * lightPosition).xyz;
-
+    
     // Vektor der Länge 1 vom Eckpunkt zur Lichtquelle	
     vec3 L = normalize( light - pos );
-
+    
     // Normale am Eckpunkt in Weltkoordinaten berechnen   
     vec3 N = (normalMatrix * vec4(vNormal, 0.0)).xyz;
     N = normalize(N);
-
+    
     // Berechnung der diffusen Beleuchtung nach den Formeln
-    // von Phong	
+    // von Phong
     float Kd = max( dot(L, N), 0.0 );
     vec3  diffuse = Kd*localDiffuseProduct.rgb;
-
+    
     // Berechnung der spekularen Reflektion nach Phong-Blinn
     vec3 E = normalize(-pos);
     vec3 H = normalize(L+E);
-
+    
     float Ks = pow(max(dot(N, H), 0.0), shiny);
     vec4 specular = Ks * materialSpecular;
-
+    
     if (dot(L,N) < 0.0) {
       specular = vec4(0.0, 0.0, 0.0, 1.0);
     }
-
+    
     // resultierende Farbe für Fragment-Shader bestimmen
     fColor = vec4(diffuse.xyz, 1.0) + ambient * vColor + vec4(specular.xyz, 1.0);
-	
- } else {
-
+    fTexture = vTexture;
+  } else {
+    
     // keine Beleuchtungsrechnung durchführen
 
     // der übergebene Farbwert wird einfach an Fragment-Shader
@@ -141,7 +149,7 @@ void main()
 
   <script id="fragment-shader" type="x-shader/x-fragment">
 
-// Bitgr��e von float definieren
+
 precision mediump float;
 
 // Werte, die vom Vertex-Shader übergeben und in der 
@@ -149,6 +157,10 @@ precision mediump float;
 
 // Farbwert für das Fragment
 varying vec4 fColor;
+uniform bool fIsTexture;
+
+uniform sampler2D texture;
+varying vec2 fTexture;
 
 void main()
 {
@@ -156,8 +168,13 @@ void main()
   // Fragments bestimmt und in die vordefinierte Variable
   // gl_FragColor geschrieben werden
 
-  // wir übernehmen hier einfach den übergebenen Wert	  
-  gl_FragColor = fColor;
+  // wir übernehmen hier einfach den übergebenen Wert
+  if (fIsTexture == true) {
+    gl_FragColor = mix(fColor, texture2D(texture, fTexture), 0.7);
+  }
+  else {
+    gl_FragColor = fColor;
+  }
 
 }
 
@@ -184,7 +201,7 @@ die "CPU-Seite" steht -->
 <body>
 
   <!-- HSRM GIF -->
-  <img id="texImage" src="hsrm.gif" hidden </img>
+  <img id="texImage" src="hsrm.gif" hidden></img>
 
   <!-- Hier stehen die GUI-Elemente -->
 
