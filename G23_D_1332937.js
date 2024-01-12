@@ -511,6 +511,10 @@
         // initialisieren.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+        //document.getElementById("c1").innerText = (cartoon1*100).toFixed(0)+"%";
+        //document.getElementById("c2").innerText = (cartoon2*100).toFixed(0)+"%";
+        document.getElementById("ai").innerText = (ambientIntensity*100).toFixed(0)+"%";
+        document.getElementById("sh").innerText = shininess;
 
         // Durchführung der Animation: der Würfel wird um 2° weiter gedreht und zwar um die aktuell ausgewählte Achse
         if (enableRotation) theta[axis] += 2.0;
