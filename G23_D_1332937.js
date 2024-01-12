@@ -412,35 +412,14 @@
         gl.uniform1f(gl.getUniformLocation(program, "ambient"), ambientIntensity);
     }
 
-
-    //
-    // Die Funktion setzt die Szene zusammen, dort wird ein Objekt nach dem anderen gezeichnet
-    // 
-
-    function displayScene() {
+    function initDisplayScene() {
         setCamera();
-        
+
         numVertices = 0;
         pointsArray.length = 0;
         colorsArray.length = 0;
         normalsArray.length = 0;
-        
-        drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2], vec4(0.0, 1.0, 0.0, 1.0), 2, false, true);
-        
-        var lighting = true;
-        var isTexture = true;
-        gl.uniform1i(gl.getUniformLocation(program, "fIsTexture"), isTexture);
-        gl.uniform1i(gl.getUniformLocation(program, "lighting"), lighting);
-        
-        if (lighting) {
-            // die Materialfarbe für diffuse Reflektion wird spezifiziert
-            var materialDiffuse = vec4(1.0, 1.0, 0.0, 1.0);
-            var materialSpecular = vec4(1.0, 1.0, 1.0, 1.0);
-            
-            // die Beleuchtung wird durchgeführt und das Ergebnis an den Shader übergeben
-            calculateLights(materialDiffuse, materialSpecular);
-        }
-        
+
         // Initialisierung mit der Einheitsmatrix 
         model = mat4();
         
@@ -464,27 +443,63 @@
         
         // die Normal-Matrix ist fertig berechnet und wird an die Shader übergeben 
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "normalMatrix"), false, flatten(normalMat));
-        
-        gl.drawArrays(gl.TRIANGLES, 0, numVertices);
-        
-        var isTexture = false;
-        gl.uniform1i(gl.getUniformLocation(program, "fIsTexture"), isTexture);
-        
-        drawPyramid([0, 0, 0], [4, 4, 2], vec4(1.0, 1.0, 0.0, 1.0));
-        drawPyramid([0, 8, 0], [4, 4, 2], vec4(1.0, 0.0, 0.0, 1.0), 180, [1, 0, 0]);
-        drawPyramid([0, 6.666, 0.666], [1.6, 1.6, 0.8], vec4(0.0, 0.0, 1.0, 1.0), 104, [1, 0, 0]);
-        
-        drawTeapot();
-        gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    }
 
+    function setLighting(x) {
+        lighting = x;
+        gl.uniform1i(gl.getUniformLocation(program, "lighting"), x);
+    }
+
+    function setTexture(x) {
+        isTexture = x;
+        gl.uniform1i(gl.getUniformLocation(program, "fIsTexture"), x);
+    }
+    
+    function drawWithLight(
+        diffColor = vec4(1.0, 1.0, 1.0, 1.0), 
+        specColor = vec4(1.0, 1.0, 1.0, 1.0)
+    ) {
+        if (lighting) {
+            calculateLights(diffColor, specColor);
+        }
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
+    }
+
+    function displayScene() {
+        initDisplayScene();
         
-        var lighting = false;
-        gl.uniform1i(gl.getUniformLocation(program, "lighting"), lighting);
+        // Definieren der Farben
+        let col_yellow = vec4(1.0, 1.0, 0.0, 1.0);
+        let col_white = vec4(1.0, 1.0, 1.0, 1.0);
+        let col_red = vec4(1.0, 0.0, 0.0, 1.0);
+        let col_blue = vec4(0.0, 0.0, 1.0 ,1.0);
+
+        // Grüner Texturierter Würfel
+        setLighting(true);
+        setTexture(true);
+        drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2], vec4(0.0, 1.0, 0.0, 1.0), 2, false, true);
+        drawWithLight(col_yellow, col_white);
+
+        // Gelbe Pyramide
+        setTexture(false);
+        drawPyramid([0, 0, 0], [4, 4, 2], vec4(1.0, 1.0, 0.0, 1.0));
+        drawWithLight(col_yellow, col_white);
+
+        // Rote Pyramide
+        drawPyramid([0, 8, 0], [4, 4, 2], vec4(1.0, 0.0, 0.0, 1.0), 180, [1, 0, 0]);
+        drawWithLight(col_red, col_white);
+
+        // Blaue Pyramide
+        drawPyramid([0, 6.666, 0.666], [1.6, 1.6, 0.8], vec4(0.0, 0.0, 1.0, 1.0), 104, [1, 0, 0]);
+        drawWithLight(col_blue, col_white);
         
+        // CPU-Würfel
+        setLighting(false);
         drawCube([5, 0, 1], [0, 0, 1], [1, 1, 1], vec4(0.0, 0.0, 0.0, 1.0), 1, true);
-        
-        gl.drawArrays(gl.TRIANGLES, 0, numVertices);
+        drawWithLight();
+
+        //drawTeapot();
+        //gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
 
     //

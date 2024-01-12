@@ -79,14 +79,11 @@ uniform float shiny;
 
 uniform float ambient;
 
-attribute float isTexture;
-varying float v_isTexture;
 varying vec2 fTexture;
 
 
 void main()
 {
-  v_isTexture = isTexture;
   if (lighting) {
     // Beleuchtungsrechnung durchführen
     
@@ -109,7 +106,7 @@ void main()
     // Berechnung der diffusen Beleuchtung nach den Formeln
     // von Phong
     float Kd = max( dot(L, N), 0.0 );
-    vec3  diffuse = Kd*localDiffuseProduct.rgb;
+    vec3  diffuse = Kd*diffuseProduct.rgb;
     
     // Berechnung der spekularen Reflektion nach Phong-Blinn
     vec3 E = normalize(-pos);
