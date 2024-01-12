@@ -112,7 +112,7 @@ function drawTeapot() {
 
 // dieser Aufruf sollte in der Funktion displayScene stehen, sobald alle Daten soweit vorbereitet sind
 // um die Teekanne zu zeichnen - hier wird drawElements statt wie bislang drawArrays verwendet
-gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+//gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 
 
 

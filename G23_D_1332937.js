@@ -473,6 +473,10 @@
         drawPyramid([0, 0, 0], [4, 4, 2], vec4(1.0, 1.0, 0.0, 1.0));
         drawPyramid([0, 8, 0], [4, 4, 2], vec4(1.0, 0.0, 0.0, 1.0), 180, [1, 0, 0]);
         drawPyramid([0, 6.666, 0.666], [1.6, 1.6, 0.8], vec4(0.0, 0.0, 1.0, 1.0), 104, [1, 0, 0]);
+        
+        drawTeapot();
+        gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+
         gl.drawArrays(gl.TRIANGLES, 0, numVertices);
         
         var lighting = false;
@@ -532,6 +536,9 @@
 
     window.onload = function init() {
 
+        // Laden von externen Assets
+        loadTeapot();
+        
         // die Referenz auf die Canvas, d.h. den Teil des Browserfensters, in den WebGL zeichnet, 
         // wird ermittelt (über den Bezeichner in der HTML-Seite)
         canvas = document.getElementById("gl-canvas");
