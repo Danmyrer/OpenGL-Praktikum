@@ -498,11 +498,11 @@
         drawWithLight();
 
         // Teekanne
-        setLighting(true);
+        /*setLighting(true);
         drawWithLight(col_yellow, col_white);
         drawTeapot();   // Hier muss die lichtberechnung VORHER stattfinden,
                         // da der Kanne keine explizite Farbe zugeordnet ist
-        gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);*/
     }
 
     var render = function () {
@@ -617,16 +617,3 @@
         // jetzt kann mit dem Rendern der Szene begonnen werden  
         render();
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
