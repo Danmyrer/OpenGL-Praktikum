@@ -73,6 +73,7 @@ function loadTeapot() {
 
 function drawTeapot(pos, scale, axis, rotSpeed) {
     let nVertices = [];
+    let nNormals = [];
 
     // Transformationen
     for(let i = 0; i < teapotVertexData.length; i+=3) {
@@ -81,22 +82,39 @@ function drawTeapot(pos, scale, axis, rotSpeed) {
             teapotVertexData[i+1],
             teapotVertexData[i+2],
             1
+            );
+            
+            point = mult(scalem(scale[0], scale[1], scale[2]), point);
+            point = mult(rotate(thetaGlobal * rotSpeed, axis), point);
+            point = mult(translate(pos[0], pos[1], pos[2]), point);
+            
+            nVertices[i] = point[0];
+            nVertices[i+1] = point[1];
+            nVertices[i+2] = point[2];
+        }
+        
+    for (let i = 0; i < teapotNormalData.length; i+=3) {
+        //transformedVertexes[i] = teapotVertexData[i] / 3;
+        point = new vec4(
+            teapotNormalData[i], 
+            teapotNormalData[i+1], 
+            teapotNormalData[i+2], 
+            1
         );
         
-        point = mult(scalem(scale[0], scale[1], scale[2]), point);
-        point = mult(rotate(thetaGlobal * rotSpeed, axis), point);
-        point = mult(translate(pos[0], pos[1], pos[2]), point);
-
-        nVertices[i] = point[0];
-        nVertices[i+1] = point[1];
-        nVertices[i+2] = point[2];
+        // Normalen sind nicht richtungs / skalenabhängig
+        point = mult(rotate(thetaGlobal*rotSpeed, axis), point);
+        
+        nNormals[i] = point[0];
+        nNormals[i+1] = point[1];
+        nNormals[i+2] = point[2];
     }
 
     var teapotVertexNormalBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(teapotNormalData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(nNormals), gl.STATIC_DRAW);
     teapotVertexNormalBuffer.itemSize = 3;
-    teapotVertexNormalBuffer.numItems = teapotNormalData.length / 3;
+    teapotVertexNormalBuffer.numItems = nNormals.length / 3;
 
     var teapotVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
