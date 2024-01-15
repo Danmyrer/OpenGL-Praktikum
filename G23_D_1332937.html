@@ -85,8 +85,6 @@ varying vec2 fTexture;
 void main()
 {
   if (lighting) {
-    // Beleuchtungsrechnung durchführen
-    
     // Berechnung der diffusen Farbe auf basis der vertex-farbe
     vec4 localDiffuseProduct = lightDiffuse * vColor;
     
@@ -123,13 +121,8 @@ void main()
     fColor = vec4(diffuse.xyz, 1.0) + ambient * vColor + vec4(specular.xyz, 1.0);
     fTexture = vTexture;
   } else {
-    
     // keine Beleuchtungsrechnung durchführen
-
-    // der übergebene Farbwert wird einfach an Fragment-Shader
-    // weiter gereicht
     fColor = vColor;
-    
  }
 
   // 	schließlich muss wie in jedem Vertex-Shader die

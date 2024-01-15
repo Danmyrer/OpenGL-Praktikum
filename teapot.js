@@ -27,7 +27,6 @@ var teapotVertexIndexBuffer;
 // liegen sollte. Die Daten werden aus der Datei in interne Arrays
 // gespeichert.
 //
-
 function loadTeapot() {
     var request = new XMLHttpRequest();
 
@@ -72,7 +71,26 @@ function loadTeapot() {
 // vor, dass die Daten auf die "GPU-Seite" übergeben werden können
 
 
-function drawTeapot() {
+function drawTeapot(pos, scale, axis, rotSpeed) {
+    let nVertices = [];
+
+    // Transformationen
+    for(let i = 0; i < teapotVertexData.length; i+=3) {
+        point = new vec4(
+            teapotVertexData[i],
+            teapotVertexData[i+1],
+            teapotVertexData[i+2],
+            1
+        );
+        
+        point = mult(scalem(scale[0], scale[1], scale[2]), point);
+        point = mult(rotate(thetaGlobal * rotSpeed, axis), point);
+        point = mult(translate(pos[0], pos[1], pos[2]), point);
+
+        nVertices[i] = point[0];
+        nVertices[i+1] = point[1];
+        nVertices[i+2] = point[2];
+    }
 
     var teapotVertexNormalBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexNormalBuffer);
@@ -82,9 +100,9 @@ function drawTeapot() {
 
     var teapotVertexPositionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(teapotVertexData), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(nVertices), gl.STATIC_DRAW);
     teapotVertexPositionBuffer.itemSize = 3;
-    teapotVertexPositionBuffer.numItems = teapotVertexData.length / 3;
+    teapotVertexPositionBuffer.numItems = nVertices.length / 3;
 
     teapotVertexIndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);
@@ -94,7 +112,6 @@ function drawTeapot() {
 
     gl.enableVertexAttribArray(gl.getAttribLocation(program, "vPosition"));
     gl.enableVertexAttribArray(gl.getAttribLocation(program, "vNormal"));
-
 
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVertexPositionBuffer);
     gl.vertexAttribPointer(gl.getAttribLocation(program, "vPosition"), teapotVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
