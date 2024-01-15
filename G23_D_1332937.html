@@ -149,8 +149,13 @@ precision mediump float;
 varying vec4 fColor;
 uniform bool fIsTexture;
 
+uniform bool fIsCartoon;
+uniform float fCartoonThreshLow;
+uniform float fCartoonThreshHigh;
+
 uniform sampler2D texture;
 varying vec2 fTexture;
+
 
 void main()
 {
@@ -161,6 +166,42 @@ void main()
   // wir übernehmen hier einfach den übergebenen Wert
   if (fIsTexture == true) {
     gl_FragColor = mix(fColor, texture2D(texture, fTexture), 0.7);
+  }
+  else if (fIsCartoon == true) {
+    vec3 luminanceV = vec3(
+      0.2126,
+      0.7152,
+      0.0722
+    );
+    float luminance = dot(fColor.rgb, luminanceV);
+    luminance = clamp(luminance, 0.0, 1.0);
+
+    if(luminance < fCartoonThreshLow) {
+      // Hier kann man natürlich auch einfach direkt die Farbe setzen
+      // aber das wäre zu einfach
+      gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+
+      // Konvertierung in Grayscale
+      vec3 ntscGrayscaleV = vec3(
+        0.299,
+        0.587,
+        0.114
+      );
+      float ntscGrayscale = dot(fColor.rgb, ntscGrayscaleV);
+
+      // Anpassen der Helligkeit
+      float brightGrayscale = 0.2 * ntscGrayscale;
+
+      // Runden auf den ganzzahligen Graubereich
+      brightGrayscale = clamp((brightGrayscale / 255.0),0.0,1.0);
+      gl_FragColor = vec4(brightGrayscale, brightGrayscale, brightGrayscale, 1.0);
+    }
+    else if(luminance > fCartoonThreshHigh) {
+      gl_FragColor = vec4(0.9, 0.7, 0.0, 1.0);
+    }
+    else {
+      gl_FragColor = vec4(0.6, 0.4, 0.1, 1.0);
+    }
   }
   else {
     gl_FragColor = fColor;
@@ -216,6 +257,7 @@ die "CPU-Seite" steht -->
     <button id="ButtonY">Rotate Y</button>
     <button id="ButtonZ">Rotate Z</button>
     <button id="ButtonT">Rotate On/Off</button>
+    <button id="Cartoon">Cartoon On/Off</button>
   </div>
 
   <div>

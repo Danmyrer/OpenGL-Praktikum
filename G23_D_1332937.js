@@ -22,6 +22,12 @@
     let shininess = 100;
     let ambientIntensity = 0.3;
 
+    let disableCartoon = false;
+    let isCartoon = false;
+    let cartoonThreshLow = 0.3;
+    let cartoonThreshHigh = 0.75;
+
+
     // Referenz auf die Shaderprogramme
     var program;
 
@@ -137,12 +143,12 @@
         texArray.push(
             // Erstes Dreieck
             0.0, 0.0, 
-            1.0, 0.0, 
-            1.0, 1.0, 
+            2.0, 0.0, 
+            2.0, 2.0, 
             // Zweites Dreieck
             0.0, 0.0, 
-            1.0, 1.0, 
-            0.0, 1.0
+            2.0, 2.0, 
+            0.0, 2.0
         );
 
         // durch die beiden Dreiecke wurden 6 Eckpunkte in die Array eingetragen
@@ -409,6 +415,10 @@
 
         // Übergabe der ambientIntensity
         gl.uniform1f(gl.getUniformLocation(program, "ambient"), ambientIntensity);
+
+        gl.uniform1i(gl.getUniformLocation(program, "fIsCartoon"), isCartoon);
+        gl.uniform1f(gl.getUniformLocation(program, "fCartoonThreshLow"), cartoonThreshLow);
+        gl.uniform1f(gl.getUniformLocation(program, "fCartoonThreshHigh"), cartoonThreshHigh);
     }
 
     function initDisplayScene() {
@@ -454,6 +464,20 @@
         gl.uniform1i(gl.getUniformLocation(program, "fIsTexture"), x);
     }
     
+    function setCartoon(x, threshLow = 0.3, threshHigh = 0.75) {
+        if(disableCartoon) {
+            isCartoon = false;
+        }
+        else {
+            isCartoon = x;
+        }
+        gl.uniform1i(gl.getUniformLocation(program, "fIsCartoon"), isCartoon);
+        if(isCartoon) {
+            gl.uniform1f(gl.getUniformLocation(program, "fCartoonThreshLow"), cartoonThreshLow);
+            gl.uniform1f(gl.getUniformLocation(program, "fCartoonThreshHigh"), cartoonThreshHigh);
+        }
+    }
+
     function drawWithLight(
         diffColor = vec4(1.0, 1.0, 1.0, 1.0), 
         specColor = vec4(1.0, 1.0, 1.0, 1.0)
@@ -476,6 +500,7 @@
         // Grüner Texturierter Würfel
         setLighting(true);
         setTexture(true);
+        setCartoon(false);
         drawCube([5, 0, -3], [1, 0, 0], [2, 2, 2], vec4(0.0, 1.0, 0.0, 1.0), 2, false, true);
         drawWithLight(col_yellow, col_white);
 
@@ -499,14 +524,15 @@
 
         // Teekanne
         setLighting(true);
+        setCartoon(true);
         drawWithLight(col_yellow, col_white);
         drawTeapot(
             vec3(-5.0,0.0,6.0),
             vec3(0.3,0.3,0.3),
             vec3(0,1,0),
             17.039
-        );   // Hier muss die lichtberechnung VORHER stattfinden,
-                        // da der Kanne keine explizite Farbe zugeordnet ist
+        );  // Hier muss die lichtberechnung VORHER stattfinden,
+            // da der Kanne keine explizite Farbe zugeordnet ist
         gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
 
@@ -516,8 +542,8 @@
         // initialisieren.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        //document.getElementById("c1").innerText = (cartoon1*100).toFixed(0)+"%";
-        //document.getElementById("c2").innerText = (cartoon2*100).toFixed(0)+"%";
+        document.getElementById("c1").innerText = (cartoonThreshLow*100).toFixed(0)+"%";
+        document.getElementById("c2").innerText = (cartoonThreshHigh*100).toFixed(0)+"%";
         document.getElementById("ai").innerText = (ambientIntensity*100).toFixed(0)+"%";
         document.getElementById("sh").innerText = shininess;
 
@@ -600,13 +626,16 @@
         document.getElementById("ButtonY").onclick = function () { axis = 1; };
         document.getElementById("ButtonZ").onclick = function () { axis = 2; };
         document.getElementById("ButtonT").onclick = function () { enableRotation = !enableRotation };
+        document.getElementById("Cartoon").onclick = function () { disableCartoon = !disableCartoon };
         document.getElementById("SliderS").oninput = function(event){shininess = event.target.value;};
         document.getElementById("SliderA").oninput = function(event){ambientIntensity = (event.target.value/100);};
-        document.getElementById("SliderT1").oninput = function(event){cartoon1 = (event.target.value/100);};
-        document.getElementById("SliderT2").oninput = function(event){cartoon2 = (event.target.value/100);};
+        document.getElementById("SliderT1").oninput = function(event){cartoonThreshLow = (event.target.value/100);};
+        document.getElementById("SliderT2").oninput = function(event){cartoonThreshHigh = (event.target.value/100);};
 
         document.getElementById("SliderS").value = shininess;
         document.getElementById("SliderA").value = ambientIntensity * 100;
+        document.getElementById("SliderT1").value = cartoonThreshLow * 100;
+        document.getElementById("SliderT2").value = cartoonThreshHigh * 100;
 
         // Laden von Texturen
         var img = document.getElementById("texImage");
