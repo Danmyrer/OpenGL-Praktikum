@@ -530,7 +530,7 @@
             vec3(-5.0,0.0,6.0),
             vec3(0.3,0.3,0.3),
             vec3(0,1,0),
-            17.039
+            5.039
         );  // Hier muss die lichtberechnung VORHER stattfinden,
             // da der Kanne keine explizite Farbe zugeordnet ist
         gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
