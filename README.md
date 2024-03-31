@@ -1,0 +1,1 @@
+#  Praktikumsaufgabe der Hochschule
